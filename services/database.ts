@@ -1,4 +1,4 @@
-import * as SQLite from 'expo-sqlite/next';
+import * as SQLite from 'expo-sqlite';
 import { Book, Category, Note, ChatHistory, UserSubscription, AppSettings } from '@/types/database';
 
 class DatabaseService {
