@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  FlatList,
 } from 'react-native';
 import { Search, MessageCircle, FileText, Calendar, BookOpen } from 'lucide-react-native';
 import { db } from '@/services/database';

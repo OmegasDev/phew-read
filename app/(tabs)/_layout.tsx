@@ -63,18 +63,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: '',
-          tabBarIcon: () => <ExploreTabButton />,
-          tabBarButton: (props) => (
-            <View style={styles.exploreTabContainer}>
-              <ExploreTabButton />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="saved"
         options={{
           title: 'Saved',
@@ -89,6 +77,18 @@ export default function TabLayout() {
           title: 'Settings',
           tabBarIcon: ({ size, color }) => (
             <Settings size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: '',
+          tabBarIcon: () => <ExploreTabButton />,
+          tabBarButton: (props) => (
+            <View style={styles.exploreTabContainer}>
+              <ExploreTabButton />
+            </View>
           ),
         }}
       />
