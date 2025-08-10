@@ -26,6 +26,7 @@ export default function LibraryScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [booksByCategory, setBooksByCategory] = useState<{ [categoryId: string]: Book[] }>({});
   const [allBooks, setAllBooks] = useState<Book[]>([]);
+  const [deviceBooks, setDeviceBooks] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -48,10 +49,56 @@ export default function LibraryScreen() {
 
       const allBooksData = await db.getAllBooks();
       setAllBooks(allBooksData);
+      
+      // Load device books when "All Books" tab is selected
+      if (activeTab === 'all-books') {
+        await loadDeviceBooks();
+      }
     } catch (error) {
       console.error('Failed to load library:', error);
     }
   };
+
+  const loadDeviceBooks = async () => {
+    try {
+      // Simulate scanning device for documents
+      const mockDeviceBooks = [
+        {
+          id: 'device-1',
+          title: 'Sample PDF Document',
+          author: 'Unknown',
+          fileType: 'pdf',
+          filePath: '/documents/sample.pdf',
+          size: '2.5 MB',
+        },
+        {
+          id: 'device-2',
+          title: 'Text Document',
+          author: 'Unknown',
+          fileType: 'txt',
+          filePath: '/documents/notes.txt',
+          size: '156 KB',
+        },
+        {
+          id: 'device-3',
+          title: 'Research Paper',
+          author: 'Dr. Smith',
+          fileType: 'pdf',
+          filePath: '/downloads/research.pdf',
+          size: '4.2 MB',
+        },
+      ];
+      setDeviceBooks(mockDeviceBooks);
+    } catch (error) {
+      console.error('Failed to scan device books:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'all-books' && isReady) {
+      loadDeviceBooks();
+    }
+  }, [activeTab, isReady]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -97,6 +144,34 @@ export default function LibraryScreen() {
     } catch (error) {
       Alert.alert('Error', 'Failed to add book to library');
       console.error('Add book error:', error);
+    }
+  };
+
+  const addDeviceBookToLibrary = async (deviceBook: any) => {
+    try {
+      const book: Omit<Book, 'id'> = {
+        title: deviceBook.title,
+        author: deviceBook.author,
+        filePath: deviceBook.filePath,
+        lastPageRead: 0,
+        totalPages: 0,
+        categoryId: '2', // Default to "Leisure"
+        genreTags: FileService.detectGenre(deviceBook.title),
+        fileType: deviceBook.fileType,
+        isCompleted: false,
+        isFavorite: false,
+        source: 'local',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await db.createBook(book);
+      await loadLibrary();
+      
+      Alert.alert('Success', `"${deviceBook.title}" added to your library!`);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add book to library');
+      console.error('Add device book error:', error);
     }
   };
 
@@ -199,6 +274,34 @@ export default function LibraryScreen() {
     </TouchableOpacity>
   );
 
+  const renderDeviceBook = (book: any) => (
+    <TouchableOpacity
+      key={book.id}
+      style={styles.deviceBookCard}
+      onPress={() => addDeviceBookToLibrary(book)}
+    >
+      <View style={styles.deviceBookIcon}>
+        <Text style={styles.deviceBookIconText}>
+          {book.fileType.toUpperCase()}
+        </Text>
+      </View>
+      <View style={styles.deviceBookInfo}>
+        <Text style={styles.deviceBookTitle} numberOfLines={1}>
+          {book.title}
+        </Text>
+        <Text style={styles.deviceBookAuthor} numberOfLines={1}>
+          {book.author}
+        </Text>
+        <Text style={styles.deviceBookMeta}>
+          {book.size} • {book.filePath}
+        </Text>
+      </View>
+      <View style={styles.addToLibraryButton}>
+        <Plus size={20} color="#1E40AF" />
+      </View>
+    </TouchableOpacity>
+  );
+
   const renderCategory = (category: Category) => {
     const books = booksByCategory[category.id] || [];
     
@@ -296,22 +399,21 @@ export default function LibraryScreen() {
           categories.map(renderCategory)
         ) : (
           <View style={styles.allBooksContainer}>
-            {allBooks.length > 0 ? (
-              viewMode === 'grid' ? (
-                <View style={styles.booksGrid}>
-                  {allBooks.map(renderBookGrid)}
-                </View>
-              ) : (
-                <View style={styles.booksList}>
-                  {allBooks.map(renderBookList)}
-                </View>
-              )
+            <Text style={styles.allBooksTitle}>Documents on Device</Text>
+            <Text style={styles.allBooksSubtitle}>
+              Tap any document to add it to your library
+            </Text>
+            
+            {deviceBooks.length > 0 ? (
+              <View style={styles.deviceBooksList}>
+                {deviceBooks.map(renderDeviceBook)}
+              </View>
             ) : (
-              <View style={styles.emptyLibrary}>
+              <View style={styles.emptyDeviceBooks}>
                 <BookOpen size={64} color="#9CA3AF" />
-                <Text style={styles.emptyTitle}>No books yet</Text>
+                <Text style={styles.emptyTitle}>No documents found</Text>
                 <Text style={styles.emptySubtitle}>
-                  Tap the + button to add your first book
+                  No readable documents found on this device
                 </Text>
               </View>
             )}
@@ -611,5 +713,74 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  allBooksTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  allBooksSubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 24,
+  },
+  deviceBooksList: {
+    gap: 12,
+  },
+  deviceBookCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  deviceBookIcon: {
+    width: 50,
+    height: 50,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  deviceBookIconText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#6B7280',
+  },
+  deviceBookInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  deviceBookTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  deviceBookAuthor: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  deviceBookMeta: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  addToLibraryButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+  },
+  emptyDeviceBooks: {
+    alignItems: 'center',
+    paddingVertical: 80,
   },
 });
