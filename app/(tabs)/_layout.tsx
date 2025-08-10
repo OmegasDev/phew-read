@@ -11,7 +11,7 @@ function ExploreTabButton() {
       style={styles.exploreButton}
       onPress={() => router.push('/explore')}
     >
-      <Plus size={28} color="#FFF" />
+      <Compass size={32} color="#FFF" />
     </TouchableOpacity>
   );
 }
@@ -26,8 +26,8 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#E5E7EB',
-          height: 80,
-          paddingBottom: 20,
+          height: 90,
+          paddingBottom: 25,
           paddingTop: 12,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
@@ -54,11 +54,25 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="notes"
+        name="reader"
         options={{
-          title: 'Notes',
+          title: 'Reader',
           tabBarIcon: ({ size, color }) => (
-            <FileText size={size} color={color} />
+            <BookOpen size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: '',
+          tabBarButton: (props) => (
+            <View style={styles.exploreTabContainer}>
+              <ExploreTabButton />
+              <View style={styles.exploreLabel}>
+                <Text style={styles.exploreLabelText}>Explore</Text>
+              </View>
+            </View>
           ),
         }}
       />
@@ -67,7 +81,7 @@ export default function TabLayout() {
         options={{
           title: 'Saved',
           tabBarIcon: ({ size, color }) => (
-            <Compass size={size} color={color} />
+            <FileText size={size} color={color} />
           ),
         }}
       />
@@ -80,32 +94,21 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: '',
-          tabBarIcon: () => <ExploreTabButton />,
-          tabBarButton: (props) => (
-            <View style={styles.exploreTabContainer}>
-              <ExploreTabButton />
-            </View>
-          ),
-        }}
-      />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
   exploreTabContainer: {
-    top: -20,
+    top: -25,
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
   },
   exploreButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: '#1E40AF',
     justifyContent: 'center',
     alignItems: 'center',
@@ -114,5 +117,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+  },
+  exploreLabel: {
+    marginTop: 8,
+  },
+  exploreLabelText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1E40AF',
   },
 });
