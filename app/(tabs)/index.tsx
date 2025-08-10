@@ -10,7 +10,7 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { Plus, Search, Grid, List, Heart, BookOpen } from 'lucide-react-native';
+import { Plus, Search, Grid2x2 as Grid, List, Heart, BookOpen } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { db } from '@/services/database';
 import { FileService } from '@/services/fileService';
